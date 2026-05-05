@@ -110,49 +110,23 @@ local m9TargetTeam = "Guards"
 
 local globalEspEnabled = false
 
-local infiniteAmmoEnabled = false
-local ammoCoroutine = nil
-
-local function stopKillAura()
-    killAuraEnabled = false
-    killAuraCoroutine = nil
-end
-
-local function stopMp5Aura()
-    mp5KillEnabled = false
-    mp5Coroutine = nil
-end
-
-local function stopTaserAura()
-    taserKillEnabled = false
-    taserCoroutine = nil
-end
-
-local function stopM9Aura()
-    m9KillEnabled = false
-    m9Coroutine = nil
-end
-
-local function startAmmoLoop()
-    while infiniteAmmoEnabled and task.wait(0.5) do
-        local player = game.Players.LocalPlayer
-        local char = player.Character
-        if not char then continue end
-        local guns = {"AK-47", "MP5", "Taser", "M9"}
-        for _, gunName in ipairs(guns) do
-            local gun = char:FindFirstChild(gunName)
-            if gun then
-                local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
-                local maxAmmo = gun:FindFirstChild("MaxAmmo")
-                if currentAmmo then
-                    currentAmmo.Value = 9999999
-                end
-                if maxAmmo then
-                    maxAmmo.Value = 9999999
-                end
-            end
+local function setAmmo(gunName, amount)
+    local player = game.Players.LocalPlayer
+    local char = player.Character
+    if not char then return false end
+    local gun = char:FindFirstChild(gunName)
+    if gun then
+        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
+        local maxAmmo = gun:FindFirstChild("MaxAmmo")
+        if currentAmmo then
+            currentAmmo.Value = amount
         end
+        if maxAmmo then
+            maxAmmo.Value = amount
+        end
+        return true
     end
+    return false
 end
 
 local function startKillAuraLogic()
@@ -179,6 +153,11 @@ local function startKillAuraLogic()
             reloadEvent:InvokeServer()
             lastReload = tick()
             reloading = true
+            WindUI:Notify({
+                Title = "换弹",
+                Content = "AK47正在换弹",
+                Duration = 1,
+            })
         end
         
         if reloading then continue end
@@ -261,6 +240,11 @@ local function startMp5AuraLogic()
             reloadEvent:InvokeServer()
             lastReload = tick()
             reloading = true
+            WindUI:Notify({
+                Title = "换弹",
+                Content = "MP5正在换弹",
+                Duration = 1,
+            })
         end
         
         if reloading then continue end
@@ -343,6 +327,11 @@ local function startTaserAuraLogic()
             reloadEvent:InvokeServer()
             lastReload = tick()
             reloading = true
+            WindUI:Notify({
+                Title = "换弹",
+                Content = "Taser正在换弹",
+                Duration = 1,
+            })
         end
         
         if reloading then continue end
@@ -420,6 +409,11 @@ local function startM9AuraLogic()
             reloadEvent:InvokeServer()
             lastReload = tick()
             reloading = true
+            WindUI:Notify({
+                Title = "换弹",
+                Content = "M9正在换弹",
+                Duration = 1,
+            })
         end
         
         if reloading then continue end
@@ -651,10 +645,10 @@ local function checkTeamAndDisable()
         end
         WindUI:Notify({
             Title = "团队检测",
-            Content = "当前团队: 警察，已禁用犯罪者和逃出监狱者功能",
-            Duration = 3,
+            Content = "当前团队: 警察",
+            Duration = 2,
         })
-    elseif teamName == "Criminals" or teamName == "Inmates" then
+    elseif teamName == "Criminals" then
         if createdTabs["警察"] and Tabs.PoliceTab then
             stopTaserAura()
             Tabs.PoliceTab:Destroy()
@@ -663,8 +657,20 @@ local function checkTeamAndDisable()
         end
         WindUI:Notify({
             Title = "团队检测",
-            Content = "当前团队: " .. (teamName == "Criminals" and "逃出监狱者" or "犯罪者") .. "，已禁用警察功能",
-            Duration = 3,
+            Content = "当前团队: 逃出监狱者",
+            Duration = 2,
+        })
+    elseif teamName == "Inmates" then
+        if createdTabs["警察"] and Tabs.PoliceTab then
+            stopTaserAura()
+            Tabs.PoliceTab:Destroy()
+            Tabs.PoliceTab = nil
+            createdTabs["警察"] = nil
+        end
+        WindUI:Notify({
+            Title = "团队检测",
+            Content = "当前团队: 犯罪者",
+            Duration = 2,
         })
     end
 end
@@ -722,26 +728,20 @@ Tabs.MainTab:Button({
                                 end,
                             })
                             
-                            local ammoToggle = Tabs.CriminalTab:Toggle({
-                                Title = "无限弹药",
-                                Value = false,
-                                Callback = function(state)
-                                    infiniteAmmoEnabled = state
-                                    if state then
-                                        if ammoCoroutine then
-                                            ammoCoroutine = nil
-                                        end
-                                        ammoCoroutine = coroutine.wrap(startAmmoLoop)
-                                        ammoCoroutine()
+                            local ammoInput = Tabs.CriminalTab:Input({
+                                Title = "无限弹药数值",
+                                Value = "9999",
+                                Placeholder = "输入弹药数量",
+                                Callback = function(input)
+                                    local num = tonumber(input)
+                                    if num then
+                                        setAmmo("AK-47", num)
+                                        setAmmo("MP5", num)
+                                        setAmmo("M9", num)
+                                        setAmmo("Taser", num)
                                         WindUI:Notify({
-                                            Title = "无限弹药已开启",
-                                            Content = "弹药已设置为9999999",
-                                            Duration = 2,
-                                        })
-                                    else
-                                        WindUI:Notify({
-                                            Title = "无限弹药已关闭",
-                                            Content = "弹药恢复默认",
+                                            Title = "弹药已修改",
+                                            Content = "弹药已设置为: " .. num,
                                             Duration = 2,
                                         })
                                     end
@@ -829,26 +829,20 @@ Tabs.MainTab:Button({
                                 end,
                             })
                             
-                            local ammoToggle = Tabs.PoliceTab:Toggle({
-                                Title = "无限弹药",
-                                Value = false,
-                                Callback = function(state)
-                                    infiniteAmmoEnabled = state
-                                    if state then
-                                        if ammoCoroutine then
-                                            ammoCoroutine = nil
-                                        end
-                                        ammoCoroutine = coroutine.wrap(startAmmoLoop)
-                                        ammoCoroutine()
+                            local ammoInput = Tabs.PoliceTab:Input({
+                                Title = "无限弹药数值",
+                                Value = "9999",
+                                Placeholder = "输入弹药数量",
+                                Callback = function(input)
+                                    local num = tonumber(input)
+                                    if num then
+                                        setAmmo("AK-47", num)
+                                        setAmmo("MP5", num)
+                                        setAmmo("M9", num)
+                                        setAmmo("Taser", num)
                                         WindUI:Notify({
-                                            Title = "无限弹药已开启",
-                                            Content = "弹药已设置为9999999",
-                                            Duration = 2,
-                                        })
-                                    else
-                                        WindUI:Notify({
-                                            Title = "无限弹药已关闭",
-                                            Content = "弹药恢复默认",
+                                            Title = "弹药已修改",
+                                            Content = "弹药已设置为: " .. num,
                                             Duration = 2,
                                         })
                                     end
@@ -1226,26 +1220,20 @@ Tabs.MainTab:Button({
                                 end,
                             })
                             
-                            local ammoToggle = Tabs.EscapeTab:Toggle({
-                                Title = "无限弹药",
-                                Value = false,
-                                Callback = function(state)
-                                    infiniteAmmoEnabled = state
-                                    if state then
-                                        if ammoCoroutine then
-                                            ammoCoroutine = nil
-                                        end
-                                        ammoCoroutine = coroutine.wrap(startAmmoLoop)
-                                        ammoCoroutine()
+                            local ammoInput = Tabs.EscapeTab:Input({
+                                Title = "无限弹药数值",
+                                Value = "9999",
+                                Placeholder = "输入弹药数量",
+                                Callback = function(input)
+                                    local num = tonumber(input)
+                                    if num then
+                                        setAmmo("AK-47", num)
+                                        setAmmo("MP5", num)
+                                        setAmmo("M9", num)
+                                        setAmmo("Taser", num)
                                         WindUI:Notify({
-                                            Title = "无限弹药已开启",
-                                            Content = "弹药已设置为9999999",
-                                            Duration = 2,
-                                        })
-                                    else
-                                        WindUI:Notify({
-                                            Title = "无限弹药已关闭",
-                                            Content = "弹药恢复默认",
+                                            Title = "弹药已修改",
+                                            Content = "弹药已设置为: " .. num,
                                             Duration = 2,
                                         })
                                     end
@@ -1535,7 +1523,6 @@ Tabs.SettingsTab:Button({
         stopTaserAura()
         stopM9Aura()
         toggleESP(false)
-        infiniteAmmoEnabled = false
         if createdTabs["犯罪者"] and Tabs.CriminalTab then
             Tabs.CriminalTab:Destroy()
             Tabs.CriminalTab = nil
