@@ -113,8 +113,6 @@ local globalEspEnabled = false
 local infiniteAmmoEnabled = false
 local ammoCoroutine = nil
 
-local currentPlayerTeam = nil
-
 local function stopKillAura()
     killAuraEnabled = false
     killAuraCoroutine = nil
@@ -139,14 +137,7 @@ local function startAmmoLoop()
     while infiniteAmmoEnabled and task.wait(0.5) do
         local player = game.Players.LocalPlayer
         local char = player.Character
-        if not char then 
-            WindUI:Notify({
-                Title = "提示",
-                Content = "玩家死亡，无限弹药已暂停",
-                Duration = 2,
-            })
-            continue 
-        end
+        if not char then continue end
         local guns = {"AK-47", "MP5", "Taser", "M9"}
         for _, gunName in ipairs(guns) do
             local gun = char:FindFirstChild(gunName)
@@ -642,7 +633,6 @@ local function checkTeamAndDisable()
     local team = player.Team
     if not team then return end
     local teamName = team.Name
-    currentPlayerTeam = teamName
     
     if teamName == "Guards" then
         if createdTabs["犯罪者"] and Tabs.CriminalTab then
@@ -706,36 +696,6 @@ Tabs.MainTab:Button({
 Tabs.MainTab:Button({
     Title = "选择阵营",
     Callback = function()
-        if currentPlayerTeam == "Guards" then
-            Window:Dialog({
-                Title = "提示",
-                Content = "你当前是警察，只能选择警察阵营",
-                Icon = "alert",
-                Buttons = {
-                    {
-                        Title = "确定",
-                        Callback = function() end,
-                        Variant = "Primary",
-                    },
-                }
-            })
-            return
-        elseif currentPlayerTeam == "Criminals" or currentPlayerTeam == "Inmates" then
-            Window:Dialog({
-                Title = "提示",
-                Content = "你当前是逃出监狱者或犯罪者，只能选择犯罪者或逃出监狱者",
-                Icon = "alert",
-                Buttons = {
-                    {
-                        Title = "确定",
-                        Callback = function() end,
-                        Variant = "Primary",
-                    },
-                }
-            })
-            return
-        end
-        
         Window:Dialog({
             Title = "选择模式",
             Content = "选择你当前的阵营",
@@ -746,14 +706,6 @@ Tabs.MainTab:Button({
                     Icon = "bird",
                     Variant = "Tertiary",
                     Callback = function()
-                        if currentPlayerTeam ~= "Inmates" then
-                            WindUI:Notify({
-                                Title = "提示",
-                                Content = "你不是犯罪者，无法选择此阵营",
-                                Duration = 2,
-                            })
-                            return
-                        end
                         if not createdTabs["犯罪者"] then
                             Tabs.CriminalTab = Window:Tab({ Title = "犯罪者", Icon = "skull" })
                             Tabs.CriminalTab:Paragraph({
@@ -861,14 +813,6 @@ Tabs.MainTab:Button({
                     Icon = "bird",
                     Variant = "Tertiary",
                     Callback = function()
-                        if currentPlayerTeam ~= "Guards" then
-                            WindUI:Notify({
-                                Title = "提示",
-                                Content = "你不是警察，无法选择此阵营",
-                                Duration = 2,
-                            })
-                            return
-                        end
                         if not createdTabs["警察"] then
                             Tabs.PoliceTab = Window:Tab({ Title = "警察", Icon = "badge" })
                             Tabs.PoliceTab:Paragraph({
@@ -1257,14 +1201,6 @@ Tabs.MainTab:Button({
                     Icon = "bird",
                     Variant = "Secondary",
                     Callback = function()
-                        if currentPlayerTeam ~= "Criminals" then
-                            WindUI:Notify({
-                                Title = "提示",
-                                Content = "你不是逃出监狱者，无法选择此阵营",
-                                Duration = 2,
-                            })
-                            return
-                        end
                         if not createdTabs["逃出监狱者"] then
                             if currentKillAuraTab and Tabs[currentKillAuraTab] then
                                 Tabs[currentKillAuraTab]:Destroy()
