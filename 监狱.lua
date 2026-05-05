@@ -119,10 +119,10 @@ local function setAmmo(gunName, amount)
         local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
         local maxAmmo = gun:FindFirstChild("MaxAmmo")
         if currentAmmo then
-            currentAmmo = amount
+            currentAmmo.Value = amount
         end
         if maxAmmo then
-            maxAmmo = amount
+            maxAmmo.Value = amount
         end
         return true
     end
@@ -135,9 +135,6 @@ local function startKillAuraLogic()
     local event = rs:WaitForChild("GunRemotes"):WaitForChild("ShootEvent")
     local reloadEvent = rs:WaitForChild("GunRemotes"):WaitForChild("FuncReload")
     
-    local lastReload = 0
-    local reloading = false
-    
     while killAuraEnabled and task.wait(0.05) do
         local char = player.Character
         if not char then continue end
@@ -148,19 +145,16 @@ local function startKillAuraLogic()
         if not muzzle then continue end
         local wz = muzzle.AssemblyCenterOfMass
         
-        reloading = false
-        if tick() - lastReload >= 5 then
+        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
+        if currentAmmo and currentAmmo.Value == 0 then
             reloadEvent:InvokeServer()
-            lastReload = tick()
-            reloading = true
             WindUI:Notify({
                 Title = "换弹",
-                Content = "AK47正在换弹",
+                Content = "AK47弹药为0，正在换弹",
                 Duration = 1,
             })
+            task.wait(0.5)
         end
-        
-        if reloading then continue end
         
         local closestTarget = nil
         local closestDist = math.huge
@@ -222,9 +216,6 @@ local function startMp5AuraLogic()
     local event = rs:WaitForChild("GunRemotes"):WaitForChild("ShootEvent")
     local reloadEvent = rs:WaitForChild("GunRemotes"):WaitForChild("FuncReload")
     
-    local lastReload = 0
-    local reloading = false
-    
     while mp5KillEnabled and task.wait(0.05) do
         local char = player.Character
         if not char then continue end
@@ -235,19 +226,16 @@ local function startMp5AuraLogic()
         if not muzzle then continue end
         local wz = muzzle.AssemblyCenterOfMass
         
-        reloading = false
-        if tick() - lastReload >= 5 then
+        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
+        if currentAmmo and currentAmmo.Value == 0 then
             reloadEvent:InvokeServer()
-            lastReload = tick()
-            reloading = true
             WindUI:Notify({
                 Title = "换弹",
-                Content = "MP5正在换弹",
+                Content = "MP5弹药为0，正在换弹",
                 Duration = 1,
             })
+            task.wait(0.5)
         end
-        
-        if reloading then continue end
         
         local closestTarget = nil
         local closestDist = math.huge
@@ -309,9 +297,6 @@ local function startTaserAuraLogic()
     local event = rs:WaitForChild("GunRemotes"):WaitForChild("ShootEvent")
     local reloadEvent = rs:WaitForChild("GunRemotes"):WaitForChild("FuncReload")
     
-    local lastReload = 0
-    local reloading = false
-    
     while taserKillEnabled and task.wait(0.05) do
         local char = player.Character
         if not char then continue end
@@ -322,19 +307,16 @@ local function startTaserAuraLogic()
         if not muzzle then continue end
         local wz = muzzle.AssemblyCenterOfMass
         
-        reloading = false
-        if tick() - lastReload >= 5 then
+        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
+        if currentAmmo and currentAmmo.Value == 0 then
             reloadEvent:InvokeServer()
-            lastReload = tick()
-            reloading = true
             WindUI:Notify({
                 Title = "换弹",
-                Content = "Taser正在换弹",
+                Content = "Taser弹药为0，正在换弹",
                 Duration = 1,
             })
+            task.wait(0.5)
         end
-        
-        if reloading then continue end
         
         local closestTarget = nil
         local closestDist = math.huge
@@ -391,9 +373,6 @@ local function startM9AuraLogic()
     local event = rs:WaitForChild("GunRemotes"):WaitForChild("ShootEvent")
     local reloadEvent = rs:WaitForChild("GunRemotes"):WaitForChild("FuncReload")
     
-    local lastReload = 0
-    local reloading = false
-    
     while m9KillEnabled and task.wait(0.05) do
         local char = player.Character
         if not char then continue end
@@ -404,19 +383,16 @@ local function startM9AuraLogic()
         if not muzzle then continue end
         local wz = muzzle.AssemblyCenterOfMass
         
-        reloading = false
-        if tick() - lastReload >= 5 then
+        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
+        if currentAmmo and currentAmmo.Value == 0 then
             reloadEvent:InvokeServer()
-            lastReload = tick()
-            reloading = true
             WindUI:Notify({
                 Title = "换弹",
-                Content = "M9正在换弹",
+                Content = "M9弹药为0，正在换弹",
                 Duration = 1,
             })
+            task.wait(0.5)
         end
-        
-        if reloading then continue end
         
         local closestTarget = nil
         local closestDist = math.huge
