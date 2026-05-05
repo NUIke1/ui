@@ -20,7 +20,7 @@ end
 local Confirmed = false
 
 WindUI:Popup({
-    Title = "Ash",
+    Title = "欢迎！弹窗示例",
     Icon = "info",
     Content = "这是为 " .. gradient("WindUI", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")) .. " 库准备的示例UI",
     Buttons = {
@@ -110,25 +110,22 @@ local m9TargetTeam = "Guards"
 
 local globalEspEnabled = false
 
-local currentPlayerTeam = nil
-
-local function setAmmo(gunName, amount)
+local function setAmmo(amount)
     local player = game.Players.LocalPlayer
     local char = player.Character
-    if not char then return false end
-    local gun = char:FindFirstChild(gunName)
-    if gun then
-        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
-        local maxAmmo = gun:FindFirstChild("MaxAmmo")
-        if currentAmmo then
-            currentAmmo = amount
+    if not char then return end
+    local guns = {"AK-47", "MP5", "M9", "Taser"}
+    for _, gunName in ipairs(guns) do
+        local gun = char:FindFirstChild(gunName)
+        if gun then
+            if gun:FindFirstChild("Local_CurrentAmmo") then
+                gun.Local_CurrentAmmo = amount
+            end
+            if gun:FindFirstChild("MaxAmmo") then
+                gun.MaxAmmo = amount
+            end
         end
-        if maxAmmo then
-            maxAmmo = amount
-        end
-        return true
     end
-    return false
 end
 
 local function startKillAuraLogic()
@@ -136,6 +133,8 @@ local function startKillAuraLogic()
     local rs = game:GetService("ReplicatedStorage")
     local event = rs:WaitForChild("GunRemotes"):WaitForChild("ShootEvent")
     local reloadEvent = rs:WaitForChild("GunRemotes"):WaitForChild("FuncReload")
+    
+    local lastReload = 0
     
     while killAuraEnabled and task.wait(0.05) do
         local char = player.Character
@@ -147,16 +146,14 @@ local function startKillAuraLogic()
         if not muzzle then continue end
         local wz = muzzle.AssemblyCenterOfMass
         
-        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
-        if currentAmmo and currentAmmo.Value == 0 then
+        if tick() - lastReload >= 5 then
             reloadEvent:InvokeServer()
-            task.wait(0.5)
+            lastReload = tick()
         end
         
         local closestTarget = nil
-        local closestDist = auraRange + 1
+        local closestDist = math.huge
         local targetRoot = nil
-        local targetHead = nil
         
         for _, target in ipairs(game.Players:GetPlayers()) do
             if target == player then continue end
@@ -182,16 +179,15 @@ local function startKillAuraLogic()
             
             if shouldAttack then
                 local dist = (hrp.Position - head.Position).Magnitude
-                if dist < closestDist then
+                if dist <= auraRange and dist < closestDist then
                     closestDist = dist
                     closestTarget = head
                     targetRoot = thrp
-                    targetHead = head
                 end
             end
         end
         
-        if closestTarget and targetRoot and closestDist <= auraRange then
+        if closestTarget and targetRoot then
             if teleportKillEnabled then
                 hrp.CFrame = targetRoot.CFrame * CFrame.new(0,0,-3)
             end
@@ -207,6 +203,8 @@ local function startMp5AuraLogic()
     local event = rs:WaitForChild("GunRemotes"):WaitForChild("ShootEvent")
     local reloadEvent = rs:WaitForChild("GunRemotes"):WaitForChild("FuncReload")
     
+    local lastReload = 0
+    
     while mp5KillEnabled and task.wait(0.05) do
         local char = player.Character
         if not char then continue end
@@ -217,16 +215,14 @@ local function startMp5AuraLogic()
         if not muzzle then continue end
         local wz = muzzle.AssemblyCenterOfMass
         
-        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
-        if currentAmmo and currentAmmo.Value == 0 then
+        if tick() - lastReload >= 5 then
             reloadEvent:InvokeServer()
-            task.wait(0.5)
+            lastReload = tick()
         end
         
         local closestTarget = nil
-        local closestDist = mp5AuraRange + 1
+        local closestDist = math.huge
         local targetRoot = nil
-        local targetHead = nil
         
         for _, target in ipairs(game.Players:GetPlayers()) do
             if target == player then continue end
@@ -252,16 +248,15 @@ local function startMp5AuraLogic()
             
             if shouldAttack then
                 local dist = (hrp.Position - head.Position).Magnitude
-                if dist < closestDist then
+                if dist <= mp5AuraRange and dist < closestDist then
                     closestDist = dist
                     closestTarget = head
                     targetRoot = thrp
-                    targetHead = head
                 end
             end
         end
         
-        if closestTarget and targetRoot and closestDist <= mp5AuraRange then
+        if closestTarget and targetRoot then
             if mp5TeleportEnabled then
                 hrp.CFrame = targetRoot.CFrame * CFrame.new(0,0,-3)
             end
@@ -277,6 +272,8 @@ local function startTaserAuraLogic()
     local event = rs:WaitForChild("GunRemotes"):WaitForChild("ShootEvent")
     local reloadEvent = rs:WaitForChild("GunRemotes"):WaitForChild("FuncReload")
     
+    local lastReload = 0
+    
     while taserKillEnabled and task.wait(0.05) do
         local char = player.Character
         if not char then continue end
@@ -287,16 +284,14 @@ local function startTaserAuraLogic()
         if not muzzle then continue end
         local wz = muzzle.AssemblyCenterOfMass
         
-        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
-        if currentAmmo and currentAmmo.Value == 0 then
+        if tick() - lastReload >= 5 then
             reloadEvent:InvokeServer()
-            task.wait(0.5)
+            lastReload = tick()
         end
         
         local closestTarget = nil
-        local closestDist = taserAuraRange + 1
+        local closestDist = math.huge
         local targetRoot = nil
-        local targetHead = nil
         
         for _, target in ipairs(game.Players:GetPlayers()) do
             if target == player then continue end
@@ -320,16 +315,15 @@ local function startTaserAuraLogic()
             
             if shouldAttack then
                 local dist = (hrp.Position - head.Position).Magnitude
-                if dist < closestDist then
+                if dist <= taserAuraRange and dist < closestDist then
                     closestDist = dist
                     closestTarget = head
                     targetRoot = thrp
-                    targetHead = head
                 end
             end
         end
         
-        if closestTarget and targetRoot and closestDist <= taserAuraRange then
+        if closestTarget and targetRoot then
             if taserTeleportEnabled then
                 hrp.CFrame = targetRoot.CFrame * CFrame.new(0,0,-3)
             end
@@ -345,6 +339,8 @@ local function startM9AuraLogic()
     local event = rs:WaitForChild("GunRemotes"):WaitForChild("ShootEvent")
     local reloadEvent = rs:WaitForChild("GunRemotes"):WaitForChild("FuncReload")
     
+    local lastReload = 0
+    
     while m9KillEnabled and task.wait(0.05) do
         local char = player.Character
         if not char then continue end
@@ -355,16 +351,14 @@ local function startM9AuraLogic()
         if not muzzle then continue end
         local wz = muzzle.AssemblyCenterOfMass
         
-        local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
-        if currentAmmo and currentAmmo.Value == 0 then
+        if tick() - lastReload >= 5 then
             reloadEvent:InvokeServer()
-            task.wait(0.5)
+            lastReload = tick()
         end
         
         local closestTarget = nil
-        local closestDist = m9AuraRange + 1
+        local closestDist = math.huge
         local targetRoot = nil
-        local targetHead = nil
         
         for _, target in ipairs(game.Players:GetPlayers()) do
             if target == player then continue end
@@ -390,16 +384,15 @@ local function startM9AuraLogic()
             
             if shouldAttack then
                 local dist = (hrp.Position - head.Position).Magnitude
-                if dist < closestDist then
+                if dist <= m9AuraRange and dist < closestDist then
                     closestDist = dist
                     closestTarget = head
                     targetRoot = thrp
-                    targetHead = head
                 end
             end
         end
         
-        if closestTarget and targetRoot and closestDist <= m9AuraRange then
+        if closestTarget and targetRoot then
             if m9TeleportEnabled then
                 hrp.CFrame = targetRoot.CFrame * CFrame.new(0,0,-3)
             end
@@ -564,10 +557,6 @@ local function stopAllAuras()
     mp5KillEnabled = false
     taserKillEnabled = false
     m9KillEnabled = false
-    if killAuraCoroutine then killAuraCoroutine = nil end
-    if mp5Coroutine then mp5Coroutine = nil end
-    if taserCoroutine then taserCoroutine = nil end
-    if m9Coroutine then m9Coroutine = nil end
 end
 
 local function destroyTab(tabName)
@@ -578,52 +567,45 @@ local function destroyTab(tabName)
     end
 end
 
+local lastTeam = nil
+
 local function checkTeamAndDisable()
     local player = game.Players.LocalPlayer
     local team = player.Team
     if not team then return end
     local teamName = team.Name
-    currentPlayerTeam = teamName
+    
+    if lastTeam == teamName then return end
+    lastTeam = teamName
     
     stopAllAuras()
     
     if teamName == "Guards" then
         destroyTab("犯罪者")
         destroyTab("逃出监狱者")
-        if createdTabs["警察"] then
-            WindUI:Notify({
-                Title = "团队检测",
-                Content = "当前团队: 警察，已加载警察功能",
-                Duration = 2,
-            })
-        end
+        WindUI:Notify({
+            Title = "团队检测",
+            Content = "当前团队: 警察",
+            Duration = 2,
+        })
     elseif teamName == "Criminals" then
         destroyTab("警察")
-        if createdTabs["逃出监狱者"] then
-            WindUI:Notify({
-                Title = "团队检测",
-                Content = "当前团队: 逃出监狱者，已加载逃出监狱者功能",
-                Duration = 2,
-            })
-        end
+        WindUI:Notify({
+            Title = "团队检测",
+            Content = "当前团队: 逃出监狱者",
+            Duration = 2,
+        })
     elseif teamName == "Inmates" then
         destroyTab("警察")
-        if createdTabs["犯罪者"] then
-            WindUI:Notify({
-                Title = "团队检测",
-                Content = "当前团队: 犯罪者，已加载犯罪者功能",
-                Duration = 2,
-            })
-        end
+        WindUI:Notify({
+            Title = "团队检测",
+            Content = "当前团队: 犯罪者",
+            Duration = 2,
+        })
     end
 end
 
-spawn(function()
-    while task.wait(1) do
-        checkTeamAndDisable()
-    end
-end)
-
+game.Players.LocalPlayer:GetPropertyChangedSignal("Team"):Connect(checkTeamAndDisable)
 task.wait(1)
 checkTeamAndDisable()
 
@@ -678,22 +660,15 @@ Tabs.MainTab:Button({
                     end,
                 })
                 
-                Tabs.PoliceTab:Input({
-                    Title = "无限弹药数值",
-                    Placeholder = "输入弹药数量",
-                    Callback = function(input)
-                        local num = tonumber(input)
-                        if num then
-                            setAmmo("AK-47", num)
-                            setAmmo("MP5", num)
-                            setAmmo("M9", num)
-                            setAmmo("Taser", num)
-                            WindUI:Notify({
-                                Title = "弹药已修改",
-                                Content = "弹药已设置为: " .. num,
-                                Duration = 2,
-                            })
-                        end
+                Tabs.PoliceTab:Button({
+                    Title = "无限弹药",
+                    Callback = function()
+                        setAmmo(9999)
+                        WindUI:Notify({
+                            Title = "无限弹药",
+                            Content = "弹药已设置为9999",
+                            Duration = 2,
+                        })
                     end,
                 })
                 
@@ -1048,22 +1023,15 @@ Tabs.MainTab:Button({
                     end,
                 })
                 
-                Tabs.EscapeTab:Input({
-                    Title = "无限弹药数值",
-                    Placeholder = "输入弹药数量",
-                    Callback = function(input)
-                        local num = tonumber(input)
-                        if num then
-                            setAmmo("AK-47", num)
-                            setAmmo("MP5", num)
-                            setAmmo("M9", num)
-                            setAmmo("Taser", num)
-                            WindUI:Notify({
-                                Title = "弹药已修改",
-                                Content = "弹药已设置为: " .. num,
-                                Duration = 2,
-                            })
-                        end
+                Tabs.EscapeTab:Button({
+                    Title = "无限弹药",
+                    Callback = function()
+                        setAmmo(9999)
+                        WindUI:Notify({
+                            Title = "无限弹药",
+                            Content = "弹药已设置为9999",
+                            Duration = 2,
+                        })
                     end,
                 })
                 
@@ -1340,22 +1308,15 @@ Tabs.MainTab:Button({
                     end,
                 })
                 
-                Tabs.CriminalTab:Input({
-                    Title = "无限弹药数值",
-                    Placeholder = "输入弹药数量",
-                    Callback = function(input)
-                        local num = tonumber(input)
-                        if num then
-                            setAmmo("AK-47", num)
-                            setAmmo("MP5", num)
-                            setAmmo("M9", num)
-                            setAmmo("Taser", num)
-                            WindUI:Notify({
-                                Title = "弹药已修改",
-                                Content = "弹药已设置为: " .. num,
-                                Duration = 2,
-                            })
-                        end
+                Tabs.CriminalTab:Button({
+                    Title = "无限弹药",
+                    Callback = function()
+                        setAmmo(9999)
+                        WindUI:Notify({
+                            Title = "无限弹药",
+                            Content = "弹药已设置为9999",
+                            Duration = 2,
+                        })
                     end,
                 })
                 
