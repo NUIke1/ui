@@ -119,10 +119,10 @@ local function setAmmo(gunName, amount)
         local currentAmmo = gun:FindFirstChild("Local_CurrentAmmo")
         local maxAmmo = gun:FindFirstChild("MaxAmmo")
         if currentAmmo then
-            currentAmmo.Value = amount
+            currentAmmo = amount
         end
         if maxAmmo then
-            maxAmmo.Value = amount
+            maxAmmo = amount
         end
         return true
     end
