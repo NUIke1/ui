@@ -728,9 +728,8 @@ Tabs.MainTab:Button({
                                 end,
                             })
                             
-                            local ammoInput = Tabs.CriminalTab:Input({
+                            Tabs.CriminalTab:Input({
                                 Title = "无限弹药数值",
-                                Value = "9999",
                                 Placeholder = "输入弹药数量",
                                 Callback = function(input)
                                     local num = tonumber(input)
@@ -745,6 +744,180 @@ Tabs.MainTab:Button({
                                             Duration = 2,
                                         })
                                     end
+                                end,
+                            })
+                            
+                            local killToggle = Tabs.CriminalTab:Toggle({
+                                Title = "AK47杀戮光环",
+                                Value = false,
+                                Callback = function(state)
+                                    if killAuraCoroutine and killAuraEnabled then
+                                        killAuraEnabled = false
+                                        task.wait(0.1)
+                                    end
+                                    killAuraEnabled = state
+                                    if killAuraEnabled then
+                                        killAuraCoroutine = coroutine.wrap(startKillAuraLogic)
+                                        killAuraCoroutine()
+                                        WindUI:Notify({
+                                            Title = "AK47杀戮光环已开启",
+                                            Content = "范围: " .. auraRange,
+                                            Duration = 2,
+                                        })
+                                    else
+                                        WindUI:Notify({
+                                            Title = "AK47杀戮光环已关闭",
+                                            Duration = 2,
+                                        })
+                                    end
+                                end,
+                            })
+                            
+                            local teleportToggle = Tabs.CriminalTab:Toggle({
+                                Title = "AK47传送杀戮光环",
+                                Value = false,
+                                Callback = function(state)
+                                    teleportKillEnabled = state
+                                    if state then
+                                        WindUI:Notify({
+                                            Title = "AK47传送已开启",
+                                            Content = "攻击时会传送到敌人身边",
+                                            Duration = 2,
+                                        })
+                                    else
+                                        WindUI:Notify({
+                                            Title = "AK47传送已关闭",
+                                            Duration = 2,
+                                        })
+                                    end
+                                end,
+                            })
+                            
+                            local rangeSlider = Tabs.CriminalTab:Slider({
+                                Title = "AK47攻击范围",
+                                Value = {
+                                    Min = 10,
+                                    Max = 1000,
+                                    Default = 100,
+                                },
+                                Callback = function(value)
+                                    auraRange = value
+                                end,
+                            })
+                            
+                            local mp5Toggle = Tabs.CriminalTab:Toggle({
+                                Title = "MP5杀戮光环",
+                                Value = false,
+                                Callback = function(state)
+                                    if mp5Coroutine and mp5KillEnabled then
+                                        mp5KillEnabled = false
+                                        task.wait(0.1)
+                                    end
+                                    mp5KillEnabled = state
+                                    if mp5KillEnabled then
+                                        mp5Coroutine = coroutine.wrap(startMp5AuraLogic)
+                                        mp5Coroutine()
+                                        WindUI:Notify({
+                                            Title = "MP5杀戮光环已开启",
+                                            Content = "范围: " .. mp5AuraRange,
+                                            Duration = 2,
+                                        })
+                                    else
+                                        WindUI:Notify({
+                                            Title = "MP5杀戮光环已关闭",
+                                            Duration = 2,
+                                        })
+                                    end
+                                end,
+                            })
+                            
+                            local mp5TeleportToggle = Tabs.CriminalTab:Toggle({
+                                Title = "MP5传送杀戮光环",
+                                Value = false,
+                                Callback = function(state)
+                                    mp5TeleportEnabled = state
+                                    if state then
+                                        WindUI:Notify({
+                                            Title = "MP5传送已开启",
+                                            Content = "攻击时会传送到敌人身边",
+                                            Duration = 2,
+                                        })
+                                    else
+                                        WindUI:Notify({
+                                            Title = "MP5传送已关闭",
+                                            Duration = 2,
+                                        })
+                                    end
+                                end,
+                            })
+                            
+                            local mp5RangeSlider = Tabs.CriminalTab:Slider({
+                                Title = "MP5攻击范围",
+                                Value = {
+                                    Min = 10,
+                                    Max = 1000,
+                                    Default = 100,
+                                },
+                                Callback = function(value)
+                                    mp5AuraRange = value
+                                end,
+                            })
+                            
+                            local m9Toggle = Tabs.CriminalTab:Toggle({
+                                Title = "M9杀戮光环",
+                                Value = false,
+                                Callback = function(state)
+                                    if m9Coroutine and m9KillEnabled then
+                                        m9KillEnabled = false
+                                        task.wait(0.1)
+                                    end
+                                    m9KillEnabled = state
+                                    if m9KillEnabled then
+                                        m9Coroutine = coroutine.wrap(startM9AuraLogic)
+                                        m9Coroutine()
+                                        WindUI:Notify({
+                                            Title = "M9杀戮光环已开启",
+                                            Content = "范围: " .. m9AuraRange,
+                                            Duration = 2,
+                                        })
+                                    else
+                                        WindUI:Notify({
+                                            Title = "M9杀戮光环已关闭",
+                                            Duration = 2,
+                                        })
+                                    end
+                                end,
+                            })
+                            
+                            local m9TeleportToggle = Tabs.CriminalTab:Toggle({
+                                Title = "M9传送杀戮光环",
+                                Value = false,
+                                Callback = function(state)
+                                    m9TeleportEnabled = state
+                                    if state then
+                                        WindUI:Notify({
+                                            Title = "M9传送已开启",
+                                            Content = "攻击时会传送到敌人身边",
+                                            Duration = 2,
+                                        })
+                                    else
+                                        WindUI:Notify({
+                                            Title = "M9传送已关闭",
+                                            Duration = 2,
+                                        })
+                                    end
+                                end,
+                            })
+                            
+                            local m9RangeSlider = Tabs.CriminalTab:Slider({
+                                Title = "M9攻击范围",
+                                Value = {
+                                    Min = 10,
+                                    Max = 1000,
+                                    Default = 100,
+                                },
+                                Callback = function(value)
+                                    m9AuraRange = value
                                 end,
                             })
                             
@@ -793,6 +966,32 @@ Tabs.MainTab:Button({
                                 end,
                             })
                             
+                            Tabs.CriminalTab:Button({
+                                Title = "重置所有光环",
+                                Callback = function()
+                                    killToggle:SetValue(false)
+                                    teleportToggle:SetValue(false)
+                                    rangeSlider:SetValue(100)
+                                    mp5Toggle:SetValue(false)
+                                    mp5TeleportToggle:SetValue(false)
+                                    mp5RangeSlider:SetValue(100)
+                                    m9Toggle:SetValue(false)
+                                    m9TeleportToggle:SetValue(false)
+                                    m9RangeSlider:SetValue(100)
+                                    if killAuraEnabled then killAuraEnabled = false end
+                                    teleportKillEnabled = false
+                                    if mp5KillEnabled then mp5KillEnabled = false end
+                                    mp5TeleportEnabled = false
+                                    if m9KillEnabled then m9KillEnabled = false end
+                                    m9TeleportEnabled = false
+                                    WindUI:Notify({
+                                        Title = "已重置",
+                                        Content = "所有光环已关闭，范围已重置为100",
+                                        Duration = 2,
+                                    })
+                                end,
+                            })
+                            
                             createdTabs["犯罪者"] = true
                             WindUI:Notify({
                                 Title = "选项卡已创建",
@@ -829,9 +1028,8 @@ Tabs.MainTab:Button({
                                 end,
                             })
                             
-                            local ammoInput = Tabs.PoliceTab:Input({
+                            Tabs.PoliceTab:Input({
                                 Title = "无限弹药数值",
-                                Value = "9999",
                                 Placeholder = "输入弹药数量",
                                 Callback = function(input)
                                     local num = tonumber(input)
@@ -1220,9 +1418,8 @@ Tabs.MainTab:Button({
                                 end,
                             })
                             
-                            local ammoInput = Tabs.EscapeTab:Input({
+                            Tabs.EscapeTab:Input({
                                 Title = "无限弹药数值",
-                                Value = "9999",
                                 Placeholder = "输入弹药数量",
                                 Callback = function(input)
                                     local num = tonumber(input)
