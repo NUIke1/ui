@@ -240,7 +240,7 @@ LoaderTab:Button({
 })
 
 LoaderTab:Button({
-    Title = "加载 木筏101生存 脚本",
+    Title = "加载 监狱人生 脚本",
     Icon = "ghost",
     Callback = function()
         if not demonologyLoaded then
@@ -301,6 +301,40 @@ LoaderTab:Button({
             WindUI:Notify({
                 Title = "提示",
                 Content = "通用自瞄 脚本已加载过",
+                Duration = 2
+            })
+        end
+    end
+})
+
+LoaderTab:Button({
+    Title = "加载 通用 脚本",
+    Icon = "target",
+    Callback = function()
+        if not aimbotLoaded then
+            local success, err = pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/ckckck123456/ck.lua1/refs/heads/main/Sentinel%20%20Hub.lua"))()
+            end)
+            if success then
+                aimbotLoaded = true
+                WindUI:Notify({
+                    Title = "加载成功",
+                    Content = "通用 脚本已加载",
+                    Icon = "check",
+                    Duration = 3
+                })
+            else
+                WindUI:Notify({
+                    Title = "加载失败",
+                    Content = "错误: " .. tostring(err),
+                    Icon = "x",
+                    Duration = 3
+                })
+            end
+        else
+            WindUI:Notify({
+                Title = "提示",
+                Content = "通用 脚本已加载过",
                 Duration = 2
             })
         end
