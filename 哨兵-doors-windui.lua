@@ -300,8 +300,6 @@ local Connections = {}
 local isChinese = false
 local velocityLimiter = nil
 local replicatesignal = nil
-local SpeedSliderObj = nil
-local FlySpeedSliderObj = nil
 
 local function GetCharacter()
     return LocalPlayer.Character
@@ -361,7 +359,7 @@ local function GetNearestCloset()
         local assets = Workspace.CurrentRooms[room]:FindFirstChild("Assets")
         if assets then
             for _, v in pairs(assets:GetChildren()) do
-                if v.Name == "Wardrobe" or v.Name == "Rooms_Locker" or v.Name == "Backdoor_Wardrobe" or v.Name == "Toolshed" or v.Name == "Locker_Large" or v.Name == "Bed" or v.Name == "Double_Bed" then
+                if v.Name == "Wardrobe" or v.Name == "Rooms_Locker" or v.Name == "Rooms_Locker_Fridge" or v.Name == "Toolshed" or v.Name == "Locker_Large" or v.Name == "Backdoor_Wardrobe" or v.Name == "Bed" or v.Name == "Double_Bed" then
                     if v.PrimaryPart then
                         local dist = GetDistance(v.PrimaryPart.Position)
                         if dist < minDist then
@@ -2282,12 +2280,6 @@ Bypass2Section:Toggle({
     Value = false,
     Callback = function(state)
         Toggles.SpeedBypass = state
-        if SpeedSliderObj then
-            SpeedSliderObj:SetMax(state and 150 or 21)
-        end
-        if FlySpeedSliderObj then
-            FlySpeedSliderObj:SetMax(state and 150 or 21)
-        end
     end
 })
 
@@ -2383,19 +2375,19 @@ local Names = {
 local function InfPrompt(Prompt)
     local Char = GetCharacter()
     if not Char then return end
-    
+
     local RootPart = GetRoot()
     if not RootPart then return end
-    
+
     local Tool = Char:FindFirstChild("Lockpick") or Char:FindFirstChild("SkeletonKey") or Char:FindFirstChild("Shears")
     local Name = Tool and Tool.Name
 
     if Tool then
-        if Prompt:GetAttribute("InfItems") and Prompt:GetAttribute("Tool") ~= Name then 
+        if Prompt:GetAttribute("InfItems") and Prompt:GetAttribute("Tool") ~= Name then
             if Prompt.Parent then
                 local ExistingPrompt = Prompt.Parent:FindFirstChild("InfPrompt")
-                if ExistingPrompt then 
-                    ExistingPrompt:Destroy() 
+                if ExistingPrompt then
+                    ExistingPrompt:Destroy()
                 end
                 Prompt:SetAttribute("InfItems", nil)
                 Prompt.Enabled = true
@@ -2407,7 +2399,7 @@ local function InfPrompt(Prompt)
             Prompt:SetAttribute("InfItems", true)
             Prompt:SetAttribute("Tool", Name)
             Prompt.ClickablePrompt = false
-            
+
             local Clone = Prompt:Clone()
             Clone.Name = "InfPrompt"
             Clone.MaxActivationDistance = Prompt.MaxActivationDistance * 0.5
@@ -2424,13 +2416,13 @@ local function InfPrompt(Prompt)
                     task.spawn(function()
                         local Drop = nil
                         local StartTime = tick()
-                        
+
                         repeat
                             if remotesFolder and remotesFolder:FindFirstChild("DropItem") then
                                 remotesFolder.DropItem:FireServer(Tool)
                             end
                             task.wait(0.01)
-                            
+
                             local ClosestDist = 15
                             for _, v in pairs(Workspace.Drops:GetChildren()) do
                                 if v.Name == Name then
@@ -2442,7 +2434,7 @@ local function InfPrompt(Prompt)
                                 end
                             end
                         until Drop or not Char:FindFirstChild(Name) or (tick() - StartTime) > 3
-                        
+
                         if Name == "Shears" then
                             FirePrompt(Prompt)
                             if Drop then
@@ -2456,7 +2448,7 @@ local function InfPrompt(Prompt)
                             end
                             FirePrompt(Prompt)
                         end
-                        
+
                         Prompt:SetAttribute("InfItems", nil)
                         Prompt:SetAttribute("Tool", nil)
                         Prompt.Enabled = true
@@ -2473,8 +2465,8 @@ local function InfPrompt(Prompt)
     elseif (Char:FindFirstChild("Key") or Char:FindFirstChild("Fuse")) and Prompt:GetAttribute("InfItems") then
         if Prompt.Parent then
             local ExistingPrompt = Prompt.Parent:FindFirstChild("InfPrompt")
-            if ExistingPrompt then 
-                ExistingPrompt:Destroy() 
+            if ExistingPrompt then
+                ExistingPrompt:Destroy()
             end
         end
         Prompt:SetAttribute("InfItems", nil)
@@ -2504,8 +2496,8 @@ Bypass2Section:Toggle({
                     if Names[Prompt.Parent.Name] then
                         if Prompt:GetAttribute("InfItems") then
                             local Fake = Prompt.Parent:FindFirstChild("InfPrompt")
-                            if Fake then 
-                                Fake:Destroy() 
+                            if Fake then
+                                Fake:Destroy()
                             end
                             Prompt:SetAttribute("InfItems", nil)
                             Prompt.Enabled = true
@@ -2574,12 +2566,12 @@ Bypass2Section:Toggle({
                     Toggles.FakeRevive = false
                     return
                 end
-                
+
                 local oxygenModule = MainGame:FindFirstChild("Oxygen")
                 local healthModule = MainGame:FindFirstChild("Health")
                 local cameraModule = MainGame:FindFirstChild("Camera")
                 local inventoryModule = MainGame:FindFirstChild("Inventory")
-                
+
                 if oxygenModule and healthModule then
                     task.delay(0.5, function()
                         if not Toggles.FakeRevive then return end
@@ -2588,7 +2580,7 @@ Bypass2Section:Toggle({
                         inventoryModule.Enabled = false
                     end)
                 end
-                
+
                 task.spawn(function()
                     while Toggles.FakeRevive and char and char:GetAttribute("Alive") do
                         if remotesFolder and remotesFolder:FindFirstChild("Underwater") then
@@ -2596,7 +2588,7 @@ Bypass2Section:Toggle({
                         end
                         task.wait(0.25)
                     end
-                    
+
                     if char and char:GetAttribute("Alive") and not Toggles.FakeRevive then
                         if remotesFolder and remotesFolder:FindFirstChild("Underwater") then
                             remotesFolder.Underwater:FireServer(false)
@@ -2606,13 +2598,13 @@ Bypass2Section:Toggle({
                         Notify("假复活已禁用，无法杀死玩家", 5)
                         return
                     end
-                    
+
                     if char and not char:GetAttribute("Alive") then
                         FakeReviveActive = true
                         workspace.Gravity = 0
-                        
+
                         if cameraModule then cameraModule.Enabled = false end
-                        
+
                         local mainUI = LocalPlayer.PlayerGui:FindFirstChild("MainUI")
                         if mainUI then
                             for _, hotbarItem in pairs(mainUI.MainFrame.Hotbar:GetChildren()) do
@@ -2621,7 +2613,7 @@ Bypass2Section:Toggle({
                                 end
                             end
                         end
-                        
+
                         local humanoid = char:FindFirstChild("Humanoid")
                         if humanoid then
                             humanoid.Name = "old_Humanoid"
@@ -2633,7 +2625,7 @@ Bypass2Section:Toggle({
                             workspace.CurrentCamera.CameraSubject = char
                             newHumanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
                         end
-                        
+
                         local root = GetRoot()
                         if root then
                             local determined_cframe = root.CFrame * CFrame.new(math.random(-100, 100)/200, math.random(-100, 100)/200, math.random(-100, 100)/200)
@@ -2644,72 +2636,72 @@ Bypass2Section:Toggle({
                                 root.CFrame = determined_cframe
                             until atempts > 250 and atempts > 2
                         end
-                        
+
                         for _, part in pairs(char:GetDescendants()) do
                             if part:IsA("BasePart") and part.Name ~= "UpperTorso" and part.Name ~= "Collision" and part.Parent.Name ~= "Collision" then
                                 part.Massless = true
                                 part.CustomPhysicalProperties = PhysicalProperties.new(100, 0.3, 0.5, 1, 1)
                             end
                         end
-                        
+
                         for _, weld in pairs(char:GetChildren()) do
                             if weld:IsA("Weld") then weld:Destroy() end
                         end
-                        
+
                         workspace.CurrentCamera.CameraSubject = char:FindFirstChildOfClass("Humanoid")
                         workspace.CurrentCamera.CameraType = "Custom"
                         LocalPlayer.CameraMinZoomDistance = 0.5
                         LocalPlayer.CameraMaxZoomDistance = 400
                         LocalPlayer.CameraMode = "Classic"
-                        
+
                         local head = char:FindFirstChild("Head")
                         if head then head.Anchored = false end
-                        
+
                         local humanoidDescription = Players:GetHumanoidDescriptionFromUserId(LocalPlayer.UserId)
                         humanoidDescription.HeightScale = 1.2
-                        
+
                         local previewCharacter = Players:CreateHumanoidModelFromDescription(humanoidDescription, Enum.HumanoidRigType.R15)
                         previewCharacter.Parent = Workspace
                         previewCharacter.Name = "PreviewCharacter"
                         previewCharacter.HumanoidRootPart.Anchored = true
-                        
+
                         local upperTorso = char:FindFirstChild("UpperTorso")
                         if upperTorso then upperTorso.CanCollide = false end
-                        
+
                         local leftFoot = char:FindFirstChild("LeftFoot")
                         if leftFoot then leftFoot.CanCollide = true end
                         local rightFoot = char:FindFirstChild("RightFoot")
                         if rightFoot then rightFoot.CanCollide = true end
-                        
+
                         local function generateCharacterCFrame(obj)
                             local obj_pos = obj.Position
                             return CFrame.new(obj_pos, obj_pos - (Vector3.new(workspace.CurrentCamera.CFrame.Position.X, obj_pos.Y, workspace.CurrentCamera.CFrame.Position.Z) - obj_pos).unit)
                         end
-                        
+
                         local FakeReviveRenderConn = RunService.RenderStepped:Connect(function()
                             if char:FindFirstChild("Humanoid") then
                                 char.Humanoid.WalkSpeed = 15
                             end
-                            
+
                             if root and root.Position.Y < -150 then
                                 root.Position = workspace.SpawnLocation.Position
                             end
-                            
+
                             if char:FindFirstChild("UpperTorso") then
                                 char.UpperTorso.CanCollide = false
                             end
-                            
+
                             if previewCharacter then
                                 previewCharacter:PivotTo(generateCharacterCFrame(root.CFrame * CFrame.new(0, 1000, 0)))
                             end
-                            
+
                             if root then
                                 root.Transparency = 1
                                 root.CanCollide = false
                             end
                         end)
                         table.insert(FakeReviveConnections, FakeReviveRenderConn)
-                        
+
                         for _, room in pairs(Workspace.CurrentRooms:GetChildren()) do
                             task.spawn(function()
                                 local roomDetectPart = room:WaitForChild(room.Name, math.huge)
@@ -2724,7 +2716,7 @@ Bypass2Section:Toggle({
                                 end
                             end)
                         end
-                        
+
                         local CurrentRoomFixConn = workspace.CurrentRooms.ChildAdded:Connect(function(room)
                             task.spawn(function()
                                 local roomDetectPart = room:WaitForChild(room.Name, math.huge)
@@ -2740,7 +2732,7 @@ Bypass2Section:Toggle({
                             end)
                         end)
                         table.insert(FakeReviveConnections, CurrentRoomFixConn)
-                        
+
                         Notify("假复活已启动！", 3)
                     end
                 end)
@@ -2752,7 +2744,7 @@ Bypass2Section:Toggle({
             end
             table.clear(FakeReviveConnections)
             workspace.Gravity = 90
-            
+
             local char = GetCharacter()
             if char then
                 local humanoid = char:FindFirstChild("Humanoid")
@@ -2770,7 +2762,7 @@ Bypass2Section:Toggle({
                 local upperTorso = char:FindFirstChild("UpperTorso")
                 if upperTorso then upperTorso.CanCollide = true end
             end
-            
+
             if MainGame then
                 local oxygenModule = MainGame:FindFirstChild("Oxygen")
                 local healthModule = MainGame:FindFirstChild("Health")
@@ -2799,7 +2791,7 @@ local InfCrucifixConnection = RunService.Heartbeat:Connect(function()
         local Origin = root.Position
         local InfParams = RaycastParams.new()
         InfParams.FilterType = Enum.RaycastFilterType.Exclude
-        
+
         for _, Entity in pairs(Workspace:GetChildren()) do
             local Range = InfCrucfixTable[Entity.Name]
             if Range and Entity.PrimaryPart then
@@ -3080,7 +3072,7 @@ local PathVisualiserConnection = RunService.Heartbeat:Connect(function()
         for _, part in pairs(pathNodes:GetChildren()) do
             existingNodes[part.Position] = true
         end
-        
+
         for _, v in pairs(Workspace.CurrentRooms:GetDescendants()) do
             if string.find(v.Name, "MinecartNode") then
                 if not existingNodes[v.Position] then
@@ -3310,24 +3302,24 @@ FoolsSection:Slider({
 local GrabBananaJeffConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if UserInputService:GetFocusedTextBox() then return end
-    
+
     if Toggles.GrabBananaJeff and input.UserInputType == Enum.UserInputType.MouseButton1 then
         local char = GetCharacter()
         if not char then return end
-        
+
         local mouse = LocalPlayer:GetMouse()
         if not mouse then return end
-        
+
         local target = mouse.Target
         if not target then return end
-        
+
         local targetModel = target:FindFirstAncestorOfClass("Model")
         local isBanana = target.Name == "BananaPeel"
         local isJeff = targetModel and targetModel.Name == "JeffTheKiller"
-        
+
         if (isBanana or isJeff) and not holdingItem then
             local grabTarget = isBanana and target or targetModel.PrimaryPart
-            
+
             if grabTarget and (isnetworkowner and isnetworkowner(grabTarget) or true) then
                 local hum = GetHumanoid()
                 if hum then
@@ -3340,22 +3332,22 @@ local GrabBananaJeffConnection = UserInputService.InputBegan:Connect(function(in
                         end
                     end
                 end
-                
+
                 if not grabTarget:FindFirstChildOfClass("BodyGyro") then
                     local gyro = Instance.new("BodyGyro", grabTarget)
                     gyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
                     gyro.P = 3000
                 end
-                
+
                 if not grabTarget:GetAttribute("Clip") then
                     grabTarget:SetAttribute("Clip", grabTarget.CanCollide)
                 end
-                
+
                 grabTarget.CanTouch = false
                 grabTarget.CanCollide = false
                 grabTarget.AssemblyAngularVelocity = Vector3.zero
                 grabTarget.AssemblyLinearVelocity = Vector3.zero
-                
+
                 holdingItem = grabTarget
             end
         elseif holdingItem and isBanana and target == holdingItem then
@@ -3373,11 +3365,11 @@ local GrabBananaJeffConnection = UserInputService.InputBegan:Connect(function(in
             end
         end
     end
-    
+
     if Toggles.ThrowBananaJeff and holdingItem and input.KeyCode == Enum.KeyCode.G then
         local char = GetCharacter()
         if not char then return end
-        
+
         local hum = GetHumanoid()
         if hum then
             local anims = char:FindFirstChild("Animations")
@@ -3389,12 +3381,12 @@ local GrabBananaJeffConnection = UserInputService.InputBegan:Connect(function(in
                 end
             end
         end
-        
+
         task.wait(0.35)
-        
+
         local gyro = holdingItem:FindFirstChildOfClass("BodyGyro")
         if gyro then gyro:Destroy() end
-        
+
         local cam = workspace.CurrentCamera
         if cam then
             local velocity = cam.CFrame.LookVector * 50 * Options.ThrowStrength
@@ -3402,10 +3394,10 @@ local GrabBananaJeffConnection = UserInputService.InputBegan:Connect(function(in
             holdingItem.Velocity = velocity
             holdingItem.AssemblyAngularVelocity = Vector3.new(math.random(-10, 10), math.random(-10, 10), math.random(-10, 10))
         end
-        
+
         holdingItem.CanTouch = true
         holdingItem.CanCollide = holdingItem:GetAttribute("Clip") or true
-        
+
         if holdingItem:FindFirstAncestorOfClass("Model") and holdingItem:FindFirstAncestorOfClass("Model").Name == "JeffTheKiller" then
             local jeff = holdingItem:FindFirstAncestorOfClass("Model")
             for _, part in pairs(jeff:GetDescendants()) do
@@ -3415,7 +3407,7 @@ local GrabBananaJeffConnection = UserInputService.InputBegan:Connect(function(in
                 end
             end
         end
-        
+
         if holdTrack then
             holdTrack:Stop()
             holdTrack = nil
@@ -3425,7 +3417,7 @@ local GrabBananaJeffConnection = UserInputService.InputBegan:Connect(function(in
             throwTrack:Stop()
             throwTrack = nil
         end
-        
+
         holdingItem = nil
     end
 end)
@@ -3434,7 +3426,7 @@ table.insert(Connections, GrabBananaJeffConnection)
 local HoldingItemUpdate = RunService.Heartbeat:Connect(function()
     if Toggles.GrabBananaJeff and holdingItem then
         local char = GetCharacter()
-        if not char then 
+        if not char then
             if holdingItem then
                 holdingItem.CanTouch = true
                 holdingItem.CanCollide = holdingItem:GetAttribute("Clip") or true
@@ -3448,7 +3440,7 @@ local HoldingItemUpdate = RunService.Heartbeat:Connect(function()
             end
             return
         end
-        
+
         if not isnetworkowner or (isnetworkowner and not isnetworkowner(holdingItem)) then
             if holdingItem then
                 holdingItem.CanTouch = true
@@ -3463,7 +3455,7 @@ local HoldingItemUpdate = RunService.Heartbeat:Connect(function()
             end
             return
         end
-        
+
         local rightHand = char:FindFirstChild("RightHand")
         if rightHand then
             holdingItem.CFrame = rightHand.CFrame
@@ -3818,7 +3810,7 @@ local updateConn = RunService.Heartbeat:Connect(function()
     if Toggles.AutoCloset then AutoClosetLogic() end
     if Toggles.AutoInteract then AutoInteractLogic() end
     if Toggles.AutoLibrary then AutoLibraryLogic() end
-    
+
     local root = GetRoot()
     if root and Options.VelocityLimiter then
         if root.AssemblyLinearVelocity.Magnitude > (Options.VelocityLimiter * 10) then
