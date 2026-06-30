@@ -786,7 +786,6 @@ PlayerSection:Slider({
     Value = {Min = 15, Max = 21, Default = 16},
     Callback = function(value) movementSpeedVal = value end
 })
-SpeedSliderObj = PlayerSection:GetSlider("移动速度")
 
 PlayerSection:Toggle({
     Title = GetText("启用移速", "Enable Walk Speed"),
@@ -887,7 +886,6 @@ PlayerSection:Slider({
     Value = {Min = 15, Max = 21, Default = 15},
     Callback = function(value) flySpeedVal = value end
 })
-FlySpeedSliderObj = PlayerSection:GetSlider("飞行速度")
 
 PlayerSection:Toggle({
     Title = GetText("飞行模式", "Fly") .. " (F)",
