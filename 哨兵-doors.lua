@@ -7,7 +7,25 @@ local UserInputService = game:GetService("UserInputService")
 local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage") 
 local Debris = game:GetService("Debris")
-local ExecutorSupport = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/refs/heads/main/ExecutorTest"))()
+
+-- ===== 安全加载 ExecutorSupport =====
+local ExecutorSupport = {
+    fireproximityprompt = function(p)
+        if p and p:IsA("ProximityPrompt") then
+            pcall(function()
+                p:InputHoldBegin()
+                p:InputHoldEnd(p.HoldDuration or 0.5)
+            end)
+        end
+    end,
+    require = require,
+    replicatesignal = function(signal)
+        if signal and signal:IsA("BindableEvent") then signal:Fire() end
+    end,
+    firetouchinterest = function() end,
+    hookmetamethod = function() return nil end,
+    isnetworkowner = function() return true end,
+}
 
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local TweenService = game:GetService("TweenService")
@@ -885,10 +903,9 @@ PlayerBox:AddToggle('NoClip', {
     Tooltip = "你可以穿过墙壁",
     Callback = function(Value)
         if not Value then
-            local char = LocalPlayer.Character
-            if char then
-                for _, v in pairs(char:GetChildren()) do
-                    if v.Name ~= "CollisionClone" and v:IsA("BasePart") then
+            for _, v in pairs(LocalPlayer.Character:GetChildren()) do
+                if not v.Name == "CollisionClone" then
+                    if v:IsA("BasePart") then
                         v.CanCollide = true
                     end
                 end
@@ -2775,7 +2792,7 @@ table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
         end
     end
 
-    if Toggles.AutoAnchorSolver.Value and LatestRoom.Value == 50 and AutoAnchorSolver > 0.5 then
+        if Toggles.AutoAnchorSolver.Value and LatestRoom.Value == 50 and AutoAnchorSolver > 0.5 then
         AutoAnchorSolver = 0
         local Hint = LocalPlayer.PlayerGui.MainUI:FindFirstChild("AnchorHintFrame")
         if Anchors and Hint and Hint.Visible then
