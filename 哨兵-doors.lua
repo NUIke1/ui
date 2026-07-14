@@ -373,8 +373,8 @@ if not ReplicateSignal then
     end
 end
 
-if not IsNetworkOwner then
-    IsNetworkOwner = function() return true end
+if not isnetworkowner then
+    isnetworkowner = IsNetworkOwner
 end
 
 local Items = {
@@ -644,13 +644,37 @@ FoolsFloor:AddToggle('AntiJeff', {
     Callback = function(Value)
         local v = workspace:FindFirstChild("JeffTheKiller")
         if v and v.Name == "JeffTheKiller" then
-            repeat task.wait() until v.PrimaryPart and isnetworkowner(v.PrimaryPart)
-            for _, i in pairs(v:GetChildren()) do
-                if i:IsA("BasePart") then
-                    i.CanTouch = Value and false or true
+            local success = pcall(function()
+                if v.PrimaryPart then
+                    if IsNetworkOwner(v.PrimaryPart) then
+                        for _, i in pairs(v:GetChildren()) do
+                            if i:IsA("BasePart") then
+                                i.CanTouch = not Value
+                            end
+                        end
+                        if v:FindFirstChildOfClass("Humanoid") then
+                            v.Humanoid.Health = Value and 0 or 100
+                        end
+                    else
+                        Notify("你没有网络权限操作Jeff", 3)
+                    end
+                else
+                    task.wait(0.5)
+                    if v.PrimaryPart and IsNetworkOwner(v.PrimaryPart) then
+                        for _, i in pairs(v:GetChildren()) do
+                            if i:IsA("BasePart") then
+                                i.CanTouch = not Value
+                            end
+                        end
+                        if v:FindFirstChildOfClass("Humanoid") then
+                            v.Humanoid.Health = Value and 0 or 100
+                        end
+                    end
                 end
+            end)
+            if not success then
+                Notify("防Jeff 执行失败，请重试", 3)
             end
-            v.Humanoid.Health = Value and 0 or 100
         end
     end
 })
