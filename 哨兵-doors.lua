@@ -885,9 +885,10 @@ PlayerBox:AddToggle('NoClip', {
     Tooltip = "你可以穿过墙壁",
     Callback = function(Value)
         if not Value then
-            for _, v in pairs(LocalPlayer.Character:GetChildren()) do
-                if not v.Name == "CollisionClone" then
-                    if v:IsA("BasePart") then
+            local char = LocalPlayer.Character
+            if char then
+                for _, v in pairs(char:GetChildren()) do
+                    if v.Name ~= "CollisionClone" and v:IsA("BasePart") then
                         v.CanCollide = true
                     end
                 end
@@ -1174,20 +1175,21 @@ AutoBox:AddToggle('AutoHeartbeat', {
     Default = false
 })
 
+local BreakerMethod = "Legit"
+
 local function Breaker(part)
     local label = part:WaitForChild("SurfaceGui"):WaitForChild("Frame"):WaitForChild("Code")
-    local Method = "Legit"
-
+    
     local function run()
         task.wait(0.05)
         if not Toggles.AutoBreaker.Value then return end
 
-        if Method == "Exploit" then
+        if BreakerMethod == "Exploit" then
             RemotesFolder.EBF:FireServer()
             return
         end
 
-        if Method == "Legit" then
+        if BreakerMethod == "Legit" then
             local target = tonumber(label.Text)
             if target then
                 for _, v in part:GetChildren() do
@@ -1247,7 +1249,7 @@ AutoBox:AddDropdown("AutoBreakerBoxMethod", {
     Disabled = Floor.Value == "Mines" and Floor.Value == "Retro" and Floor.Value == "Outdoors" and true or false,
     Text = "自动电闸方式",
     Callback = function(Value)
-        Method = Value
+        BreakerMethod = Value
     end,
 })
 
