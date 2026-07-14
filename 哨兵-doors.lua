@@ -7,31 +7,7 @@ local UserInputService = game:GetService("UserInputService")
 local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage") 
 local Debris = game:GetService("Debris")
-
--- ===== 安全加载 ExecutorSupport =====
-local ExecutorSupport = nil
-local success, err = pcall(function()
-    ExecutorSupport = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/refs/heads/main/ExecutorTest"))()
-end)
-
-if not success or not ExecutorSupport then
-    print("ExecutorSupport 加载失败，使用备用方案")
-    ExecutorSupport = {
-        fireproximityprompt = function(p) 
-            if p and p:IsA("ProximityPrompt") then
-                p:InputHoldBegin()
-                p:InputHoldEnd(p.HoldDuration or 0.5)
-            end
-        end,
-        require = require,
-        replicatesignal = function(signal) 
-            if signal and signal:IsA("BindableEvent") then signal:Fire() end 
-        end,
-        firetouchinterest = function(a,b,c) end,
-        hookmetamethod = function() return nil end,
-        isnetworkowner = function() return true end,
-    }
-end
+local ExecutorSupport = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/refs/heads/main/ExecutorTest"))()
 
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local TweenService = game:GetService("TweenService")
@@ -72,76 +48,20 @@ getgenv().ScriptLibrary = getgenv().ScriptLibrary or "Linoria"
 end
 
 local repo = getgenv().ScriptLibrary == "Obsidian" and 'https://raw.githubusercontent.com/mstudio45/Obsidian/main/' or getgenv().ScriptLibrary == "Linoria" and 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
+    
+local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
+local NotifyLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Msdoors/Msdoors.gg/refs/heads/main/Scripts/Msdoors/Notification/Source.lua"))()
+task.wait()
+local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
+local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
+local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/ESPLibrary"))()
 
--- ===== 安全加载所有库 =====
-local Library = nil
-local NotifyLibrary = nil
-local ThemeManager = nil
-local SaveManager = nil
-local ESPLibrary = nil
-
-pcall(function()
-    Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
-end)
-
-pcall(function()
-    NotifyLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Msdoors/Msdoors.gg/refs/heads/main/Scripts/Msdoors/Notification/Source.lua"))()
-end)
-
-pcall(function()
-    ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
-end)
-
-pcall(function()
-    SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
-end)
-
-pcall(function()
-    ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/ESPLibrary"))()
-end)
-
--- 检查是否加载成功
-if not Library then
-    print("Library 加载失败，请检查网络或换执行器")
-    return
-end
-
-if not ESPLibrary then
-    print("ESPLibrary 加载失败，部分功能可能不可用")
-    -- 创建空 ESPLibrary 防止报错
-    ESPLibrary = {
-        AddESP = function() end,
-        RemoveESP = function() end,
-        SetShowDistance = function() end,
-        SetTracers = function() end,
-        SetRainbow = function() end,
-        SetESPMode = function() end,
-        SetFont = function() end,
-        SetRenderingSpeed = function() end,
-        SetShowDistance = function() end,
-        SetTracers = function() end,
-        SetRainbow = function() end,
-        SetESPMode = function() end,
-        SetFont = function() end,
-        Unload = function() end,
-    }
-end
-
-local NotificationLibrary = nil
-pcall(function()
-    NotificationLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/projects/refs/heads/main/UI/NotificationLibrary/Source.luau"))()
-end)
-
-local NotificationHandler = nil
-if NotificationLibrary then
-    pcall(function()
-        NotificationHandler = NotificationLibrary:New({
-            BackgroundColor = Color3.fromRGB(100, 100, 100),
-            VerticalPosition = "Top",
-            HorizontalPosition = "Right",
-        })
-    end)
-end
+local NotificationLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/projects/refs/heads/main/UI/NotificationLibrary/Source.luau"))()
+local NotificationHandler = NotificationLibrary:New({
+    BackgroundColor = Color3.fromRGB(100, 100, 100),
+    VerticalPosition = "Top",
+    HorizontalPosition = "Right",
+})
 
 local Options = Library.Options
 local Toggles = Library.Toggles
@@ -159,91 +79,72 @@ local Notifying = "Library"
 local PlaySound = true
 
 local function Notify(txt, duration)
-    if Notifying == "Library" and Library then
-        pcall(function()
-            Library:Notify(txt, duration)
-        end)
-    elseif Notifying == "Doors" and NotifyLibrary then
-        pcall(function()
-            NotifyLibrary({
-                Title = LibraryName,
-                Description = txt,
-                Reason = "",
-                Image = "rbxassetid://6023426923",
-                Color = Color3.fromRGB(0, 162, 255),
-                Style = "EVENT",
-                Duration = duration,
-                NotifyStyle = "Doors",
-            })
-        end)
-    elseif Notifying == "Supreme" and NotificationHandler then
-        pcall(function()
-            NotificationHandler:Create({
-                Title = "哨兵",
-                Description = txt,
-                Duration = duration,
-                Image = "",
-            })
-        end)
-    else
-        -- 备用通知
-        print("[哨兵] " .. txt)
+    if Notifying == "Library" then
+        Library:Notify(txt, duration)
+    elseif Notifying == "Doors" then
+        NotifyLibrary({
+            Title = LibraryName,
+            Description = txt,
+            Reason = "",
+            Image = "rbxassetid://6023426923",
+            Color = Color3.fromRGB(0, 162, 255),
+            Style = "EVENT",
+            Duration = duration,
+            NotifyStyle = "Doors",
+        })
+    elseif Notifying == "Supreme" then
+        NotificationHandler:Create({
+            Title = "哨兵",
+            Description = txt,
+            Duration = duration,
+            Image = "",
+        })
     end
 
     if PlaySound then
-        pcall(function()
-            local Sound = Instance.new("Sound", game:GetService("SoundService"))
-            Sound.SoundId = "rbxassetid://101511361468852"
-            Sound.PlaybackSpeed = 0.77
-            Sound.Volume = 2
-            Sound:Play()
-            game:GetService("Debris"):AddItem(Sound, 3)
-        end)
+        local Sound = Instance.new("Sound", game:GetService("SoundService"))
+        Sound.SoundId = "rbxassetid://101511361468852"
+        Sound.PlaybackSpeed = 0.77
+        Sound.Volume = 2
+        Sound:Play()
+        game:GetService("Debris"):AddItem(Sound, 3)
     end
 end
 
 function AddESP(part, txt, color)
-    if not ESPLibrary then return end
-    pcall(function()
-        ESPLibrary:AddESP({
-            Object = part,
-            Text = txt,
-            Color = color
-        })
-    end)
+    ESPLibrary:AddESP({
+        Object = part,
+        Text = txt,
+        Color = color
+    })
 end
 
 function AddEntityESP(part, txt, color)
-    if not ESPLibrary then return end
-    pcall(function()
-        if part:IsA("Model") then
-            while not part.PrimaryPart do
-                for _, v in pairs(part:GetChildren()) do
-                    if v:IsA("BasePart") then
-                        part.PrimaryPart = v
-                    end
+    if part:IsA("Model") then
+        while not part.PrimaryPart do
+            for _, v in pairs(part:GetChildren()) do
+                if v:IsA("BasePart") then
+                    part.PrimaryPart = v
                 end
-                task.wait()
             end
-            if part.PrimaryPart then
-                part.PrimaryPart.Transparency = 0.99
-            end
-            if not part:FindFirstChildOfClass("Humanoid") then
-                Instance.new("Humanoid", part)
-            end
+            task.wait()
         end
+        if part.PrimaryPart then
+            part.PrimaryPart.Transparency = 0.99
+        end
+        if not part:FindFirstChildOfClass("Humanoid") then
+            Instance.new("Humanoid", part)
+        end
+    end
 
-        if part.Name == "FigureRig" or part.Name == "FigureRagdoll" then
-            if part:FindFirstChild("Root") then
-                part:FindFirstChild("Root").Size = Vector3.new(0.001, 0.001, 0.001)
-            end
-        end
-        ESPLibrary:AddESP({
-            Object = part,
-            Text = txt,
-            Color = color,
-        })
-    end)
+    if part.Name == "FigureRig" or part.Name == "FigureRagdoll" then
+        part:WaitForChild("Root").Size = Vector3.new(0.001, 0.001, 0.001)
+    end
+    ESPLibrary:AddESP({
+        Object = part,
+        Text = txt,
+        Color = color,
+    })
 end
 
 function GetLibraryCode()
@@ -345,37 +246,12 @@ local InfCrucfixTable = {
     GlitchAmbush = 110,
 }
 
--- ===== 安全获取 ExecutorSupport 函数 =====
 local Firepp = ExecutorSupport.fireproximityprompt
 local Require = ExecutorSupport.require
 local ReplicateSignal = ExecutorSupport.replicatesignal
 local FireTouch = ExecutorSupport.firetouchinterest
 local HookMeta = ExecutorSupport.hookmetamethod
 local IsNetworkOwner = ExecutorSupport.isnetworkowner
-
--- 如果函数为空，创建备用函数
-if not Firepp then
-    Firepp = function(prompt)
-        if prompt and prompt:IsA("ProximityPrompt") then
-            pcall(function()
-                prompt:InputHoldBegin()
-                prompt:InputHoldEnd(prompt.HoldDuration or 0.5)
-            end)
-        end
-    end
-end
-
-if not ReplicateSignal then
-    ReplicateSignal = function(signal)
-        if signal and signal:IsA("BindableEvent") then
-            pcall(function() signal:Fire() end)
-        end
-    end
-end
-
-if not isnetworkowner then
-    isnetworkowner = IsNetworkOwner
-end
 
 local Items = {
     ["Bandage"] = "绷带",
@@ -434,18 +310,12 @@ local RequiredMainGame
 local ClientModules = ReplicatedStorage:FindFirstChild("ModulesClient") or ReplicatedStorage:FindFirstChild("ClientModules")
 
 local RemotesFolder = ReplicatedStorage:FindFirstChild("EntityInfo") and ReplicatedStorage:FindFirstChild("EntityInfo") or ReplicatedStorage:FindFirstChild("Bricks") and ReplicatedStorage:FindFirstChild("Bricks") or ReplicatedStorage:FindFirstChild("RemotesFolder") 
+local MotorReplication = RemotesFolder:WaitForChild("MotorReplication")
+local CollisionClone 
+local CamLock = RemotesFolder:WaitForChild("CamLock")
 
-if not RemotesFolder then
-    print("RemotesFolder 未找到，请检查游戏")
-    return
-end
-
-local MotorReplication = pcall(function() return RemotesFolder:WaitForChild("MotorReplication") end) and RemotesFolder.MotorReplication or nil
-local CollisionClone = nil
-local CamLock = pcall(function() return RemotesFolder:WaitForChild("CamLock") end) and RemotesFolder.CamLock or nil
-
-local PL = pcall(function() return RemotesFolder:WaitForChild("PL") end) and RemotesFolder.PL or nil
-local ClutchHeartbeat = pcall(function() return RemotesFolder:WaitForChild("ClutchHeartbeat") end) and RemotesFolder.ClutchHeartbeat or nil
+local PL = RemotesFolder:WaitForChild("PL")
+local ClutchHeartbeat = RemotesFolder:WaitForChild("ClutchHeartbeat")
 
 local params = RaycastParams.new()
 params.FilterDescendantsInstances = {LocalPlayer.Character}
@@ -456,118 +326,90 @@ SeekPath.Name = "SeekPath"
 local Paths = {}
 
 function ShowSeekPath(v)
-    if not v then return end
-    pcall(function()
-        local Part = Instance.new("Part", SeekPath)
-        Part.Size = Vector3.new(1.5, 1.5, 1.5)
-        Part.Anchored = true
-        Part.Shape = "Ball"
-        Part.Position = v.Position 
-        Part.CanCollide = false
-        Part.Color = Color3.new(0, 1, 0)
-        Debris:AddItem(Part, 60)
-    end)
+    local Part = Instance.new("Part", SeekPath)
+    Part.Size = Vector3.new(1.5, 1.5, 1.5)
+    Part.Anchored = true
+    Part.Shape = "Ball"
+    Part.Position = v.Position 
+    Part.CanCollide = false
+    Part.Color = Color3.new(0, 1, 0)
+    Debris:AddItem(Part, 60)
 end
 
 function FixBridge(v)
-    if not v then return end
-    pcall(function()
-        for _, i in pairs(v:GetChildren()) do
-            if i.Name == "PlayerBarrier" and i.Rotation.X == 180 then
-                local Barrier = i:Clone()
-                Barrier.CFrame = CFrame.new(i.Position.X, i.Position.Y, i.Position.Z)
-                Barrier.CFrame = Barrier.CFrame * CFrame.new(0, -7, 0)
-                Barrier.Size = Vector3.new(40, 0.1, 40)
-                Barrier.Transparency = 0.5
-                Barrier.Color = Color3.new(0.5, 0, 0.5)
-                Barrier.Material = "ForceField"
-                Barrier.Parent = v
-                Barrier.Name = "BridgeBarrier"
-                Barrier.Anchored = true
-                Barrier.CanCollide = true
-            end
+    for _, i in pairs(v:GetChildren()) do
+        if i.Name == "PlayerBarrier" and i.Rotation.X == 180 then
+            local Barrier = i:Clone()
+            Barrier.CFrame = CFrame.new(i.Position.X, i.Position.Y, i.Position.Z)
+            Barrier.CFrame = Barrier.CFrame * CFrame.new(0, -7, 0)
+            Barrier.Size = Vector3.new(40, 0.1, 40)
+            Barrier.Transparency = 0.5
+            Barrier.Color = Color3.new(0.5, 0, 0.5)
+            Barrier.Material = "ForceField"
+            Barrier.Parent = v
+            Barrier.Name = "BridgeBarrier"
+            Barrier.Anchored = true
+            Barrier.CanCollide = true
         end
-    end)
+    end
 end
 
 if Require then
-    pcall(function()
-        RequiredMainGame = require(MainGame)
-    end)
+    RequiredMainGame = require(MainGame)
 end
 
 local getcons = getconnections or get_signal_cons or get_relative_connections
 
 if getcons then
-    pcall(function()
-        for _, con in pairs(getcons(LocalPlayer.Idled)) do
-            if con.Disable then 
-                con:Disable() 
-            end
+    for _, con in pairs(getcons(LocalPlayer.Idled)) do
+        if con.Disable then 
+            con:Disable() 
         end
-    end)
+    end
 end
 
 table.insert(Connections, LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1.5)
     if LocalPlayer.Character then
-        pcall(function()
-            MainGame = LocalPlayer.PlayerGui.MainUI.Initiator:WaitForChild("Main_Game")
-            RemoteListener = MainGame.RemoteListener
-            params.FilterDescendantsInstances = {LocalPlayer.Character}
-            
-            if Toggles.NoScenes.Value then
-                local Cutscene = RemoteListener:FindFirstChild("Cutscenes") or RemoteListener:FindFirstChild("Cutscenes_")
-                if Cutscene then
-                    Cutscene.Name = "Cutscenes_"
-                end
-            end
+        MainGame = LocalPlayer.PlayerGui.MainUI.Initiator:WaitForChild("Main_Game")
+        RemoteListener = MainGame.RemoteListener
+        params.FilterDescendantsInstances = {LocalPlayer.Character}
+        
+        if Toggles.NoScenes.Value then
+            local Cutscene = RemoteListener:FindFirstChild("Cutscenes") or RemoteListener:FindFirstChild("Cutscenes_")
+            Cutscene.Name = "Cutscenes_"
+        end
 
-            if Require then
-                RequiredMainGame = require(MainGame)
-            end
-        end)
+        if Require then
+            RequiredMainGame = require(MainGame)
+        end
     end
 
     if Toggles.Jamming.Value then
-        pcall(function()
-            if ReplicatedStorage:FindFirstChild("LiveModifiers") and ReplicatedStorage:FindFirstChild("LiveModifiers"):FindFirstChild("Jammin") then
-                local Jam = LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Jam
-                if Jam then
-                    Jam.Playing = false 
-                end
-                local Jamming = game:GetService("SoundService").Main.Jamming
-                if Jamming then
-                    Jamming.Enabled = false
-                end
-            end
-        end)
+        if ReplicatedStorage:FindFirstChild("LiveModifiers") and ReplicatedStorage:FindFirstChild("LiveModifiers"):FindFirstChild("Jammin") then
+            local Jam = LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Jam
+            Jam.Playing = false 
+            local Jamming = game:GetService("SoundService").Main.Jamming
+            Jamming.Enabled = false
+        end
     end
 
     if Toggles.Godmode.Value and RemotesFolder.Name ~= "RemotesFolder" then
-        pcall(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Collision") then
-                LocalPlayer.Character.Collision.Position -= Vector3.new(0, 4, 0)
-            end
-        end)
+        LocalPlayer.Character.Collision.Position -= Vector3.new(0, 4, 0)
     end
 
     if Toggles.Dread.Value then
-        pcall(function()
-            local Dread = LocalPlayer:FindFirstChild("Dread", true) or LocalPlayer:FindFirstChild("_Dread", true)
-            if Dread then
-                Dread.Name = "_Dread"
-            end
-        end)
+        local Dread = LocalPlayer:FindFirstChild("Dread", true) or LocalPlayer:FindFirstChild("_Dread", true)
+        if Dread then
+            Dread.Name = "_Dread"
+        end
     end
 
-    if Toggles.Halt.Value and ClientModules then
-        pcall(function()
-            local Dread = ClientModules.EntityModules:FindFirstChild("Shade", true) or ClientModules.EntityModules:FindFirstChild("_Shade", true)
-            if Dread then
-                Dread.Name = "_Shade"
-            end
-        end)
+    if Toggles.Halt.Value then
+        local Dread = ClientModules.EntityModules:FindFirstChild("Shade", true) or ClientModules.EntityModules:FindFirstChild("_Shade", true)
+        if Dread then
+            Dread.Name = "_Shade"
+        end
     end
 end))
 
@@ -589,15 +431,11 @@ local RoomsFloor = Tabs.Floor:AddLeftGroupbox('rooms')
 local RetroFloor = Tabs.Floor:AddLeftGroupbox('复古')
 
 local HomeBox = Tabs.Home:AddLeftGroupbox('主页')
-local content, isReady = pcall(function()
-    return Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
-end)
-if content then
-    HomeBox:AddImage("PlayerFace", {
-        Image = content,
-        Height = 200,
-    })
-end
+local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
+HomeBox:AddImage("PlayerFace", {
+    Image = content,
+    Height = 200,
+})
 HomeBox:AddDivider()
 HomeBox:AddLabel('执行次数 ' .. (tonumber(executionCount) and tonumber(executionCount) >= 1 and executionCount or "Nan"))
 
@@ -644,37 +482,13 @@ FoolsFloor:AddToggle('AntiJeff', {
     Callback = function(Value)
         local v = workspace:FindFirstChild("JeffTheKiller")
         if v and v.Name == "JeffTheKiller" then
-            local success = pcall(function()
-                if v.PrimaryPart then
-                    if IsNetworkOwner(v.PrimaryPart) then
-                        for _, i in pairs(v:GetChildren()) do
-                            if i:IsA("BasePart") then
-                                i.CanTouch = not Value
-                            end
-                        end
-                        if v:FindFirstChildOfClass("Humanoid") then
-                            v.Humanoid.Health = Value and 0 or 100
-                        end
-                    else
-                        Notify("你没有网络权限操作Jeff", 3)
-                    end
-                else
-                    task.wait(0.5)
-                    if v.PrimaryPart and IsNetworkOwner(v.PrimaryPart) then
-                        for _, i in pairs(v:GetChildren()) do
-                            if i:IsA("BasePart") then
-                                i.CanTouch = not Value
-                            end
-                        end
-                        if v:FindFirstChildOfClass("Humanoid") then
-                            v.Humanoid.Health = Value and 0 or 100
-                        end
-                    end
+            repeat task.wait() until v.PrimaryPart and IsNetworkOwner(v.PrimaryPart)
+            for _, i in pairs(v:GetChildren()) do
+                if i:IsA("BasePart") then
+                    i.CanTouch = Value and false or true
                 end
-            end)
-            if not success then
-                Notify("防Jeff 执行失败，请重试", 3)
             end
+            v.Humanoid.Health = Value and 0 or 100
         end
     end
 })
